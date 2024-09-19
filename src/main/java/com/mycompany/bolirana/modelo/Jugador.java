@@ -10,7 +10,7 @@ import java.util.Random;
  * Clase que representa a un jugador en el juego de Bolirana.
  * Hereda de la clase Persona e incluye la posición del jugador.
  */
-class Jugador extends Persona {
+public class Jugador extends Persona {
     private String posicion;
 
     /**
@@ -31,15 +31,5 @@ class Jugador extends Persona {
      */
     public String getPosicion() {
         return posicion;
-    }
-
-    /**
-     * Simula el lanzamiento del jugador, retornando un puntaje aleatorio.
-     *
-     * @return El puntaje obtenido en el lanzamiento.
-     */
-    public int lanzar() {
-        // Simulación de lanzamiento con puntajes aleatorios (de 0 a 300)
-        return new Random().nextInt(301);
     }
 }

@@ -1,0 +1,15 @@
+# Ignorar directorios generados por la construcción del proyecto
+target/
+build/
+
+# Ignorar archivos de configuración específicos del IDE
+.nbproject/
+*.iml
+
+# Ignorar archivos de compilación
+*.class
+*.jar
+
+# Ignorar archivos temporales
+*.log
+*.tmp

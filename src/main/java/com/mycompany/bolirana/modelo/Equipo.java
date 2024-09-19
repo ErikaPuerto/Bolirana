@@ -11,7 +11,7 @@ import java.util.List;
  * Clase que representa a un equipo en el juego de Bolirana.
  * Un equipo tiene un nombre, una lista de jugadores y un puntaje total.
  */
-class Equipo {
+public class Equipo {
     private String nombre;
     private List<Jugador> jugadores;
     private int puntajeTotal;
@@ -28,33 +28,6 @@ class Equipo {
     }
 
     /**
-     * Método para agregar un jugador al equipo.
-     *
-     * @param jugador El jugador a agregar.
-     */
-    public void agregarJugador(Jugador jugador) {
-        jugadores.add(jugador);
-    }
-
-
-    /**
-     * Método que agrega puntos al puntaje total del equipo.
-     *
-     * @param puntos Los puntos que se sumarán al puntaje total.
-     */
-    public void agregarPuntaje(int puntaje) {
-        this.puntajeTotal += puntaje;
-    }
-
-    /**
-     * Metodo que verifica si el equipo ha alcanzado o superado los 5000 puntos.
-     *
-     * @return true si el equipo ha ganado, de lo contrario false.
-     */
-    public boolean haGanado() {
-        return puntajeTotal >= 5000;
-    }
-    /**
      * Metodos getters
      */
     
@@ -68,5 +41,9 @@ class Equipo {
     
     public int getPuntajeTotal() {
         return puntajeTotal;
+    }
+
+    public void setPuntajeTotal(int i) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

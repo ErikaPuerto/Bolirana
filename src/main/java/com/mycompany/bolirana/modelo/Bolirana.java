@@ -4,6 +4,9 @@
  */
 package com.mycompany.bolirana.modelo;
 
+import com.mycompany.bolirana.controlador.ControladorJuez;
+import com.mycompany.bolirana.controlador.ControladorJugador;
+import com.mycompany.bolirana.controlador.ControladorEquipo;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +16,9 @@ import java.util.List;
  */
 public class Bolirana {
     private List<Equipo> equipos;
+    private ControladorJuez controladorJuez; 
     private Juez juez;
-
+    
     /**
      * Constructor para crear un juego de Bolirana.
      *
@@ -23,6 +27,7 @@ public class Bolirana {
     public Bolirana(Juez juez) {
         this.equipos = new ArrayList<>();
         this.juez = juez;
+        this.controladorJuez = new ControladorJuez(juez);
     }
 
     /**
@@ -42,7 +47,7 @@ public class Bolirana {
      * Inicia el juego, determinando el equipo inicial y llamando al método para jugar la partida.
      */
     public void iniciarJuego() {
-        Equipo equipoInicial = juez.determinarEquipoInicial(equipos);
+        Equipo equipoInicial = controladorJuez.determinarEquipoInicial(equipos);
         System.out.println("El juez ha decidido que el equipo " + equipoInicial.getNombre() + " empieza.");
         jugarPartida(equipoInicial);
     }
@@ -58,18 +63,23 @@ public class Bolirana {
         int turno = equipos.indexOf(equipoInicial);
         int cantidadEquipos = equipos.size();
 
+        ControladorEquipo controladorEquipo; // Pasas el equipo al constructor
+
+        ControladorJugador controladorJugador; // Pasas el jugador al constructor
+
         while (juegoActivo) {
-            for (int i = 0; i < equipos.get(turno).getJugadores().size(); i++) {
-                Equipo equipoActual = equipos.get(turno);
-                Jugador jugador = equipoActual.getJugadores().get(i);
-
-                int puntaje = jugador.lanzar();
-                equipoActual.agregarPuntaje(puntaje);
-
-                System.out.println(jugador.getNombre() + " del equipo " + equipoActual.getNombre() + 
-                                   " lanzo y obtuvo " + puntaje + " puntos. Puntaje total del equipo: " + equipoActual.getPuntajeTotal());
-
-                if (equipoActual.haGanado()) {
+            Equipo equipoActual = equipos.get(turno);
+            for (Jugador jugador : equipos.get(turno).getJugadores()) {
+                controladorJugador = new ControladorJugador(jugador);
+                controladorEquipo = new ControladorEquipo(equipoActual);
+                 
+                int puntaje = controladorJugador.lanzar();
+                controladorEquipo.agregarPuntaje(puntaje);
+                
+                System.out.println(jugador.getNombre() + " del equipo " + equipoActual.getNombre() +
+                        " lanzo y obtuvo " + puntaje + " puntos. Puntaje total del equipo: " + equipoActual.getPuntajeTotal());
+                
+                if (controladorEquipo.haGanado()) {
                     System.out.println("El equipo " + equipoActual.getNombre() + " ha ganado el juego con " + equipoActual.getPuntajeTotal() + " puntos!");
                     juegoActivo = false;
                     break;

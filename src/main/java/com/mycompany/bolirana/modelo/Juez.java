@@ -11,7 +11,7 @@ import java.util.Random;
  * Clase que representa al juez del juego de Bolirana.
  * Hereda de la clase Persona e incluye la tarjeta profesional.
  */
-class Juez extends Persona {
+public class Juez extends Persona {
     private String tarjetaProfesional;
 
     /**
@@ -31,17 +31,5 @@ class Juez extends Persona {
      */
     public String getTarjetaProfesional() {
         return tarjetaProfesional;
-    }
-
-    /**
-     * Método que determina aleatoriamente cuál equipo comienza el juego.
-     *
-     * @param equipos Lista de equipos que participan en el juego.
-     * @return El equipo que fue seleccionado para iniciar.
-     */
-    
-    public Equipo determinarEquipoInicial(List<Equipo> equipos) {
-        Random random = new Random();
-        return equipos.get(random.nextInt(equipos.size()));
     }
 }
