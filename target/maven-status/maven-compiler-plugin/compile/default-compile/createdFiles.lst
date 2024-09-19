@@ -1,0 +1,9 @@
+com\mycompany\bolirana\modelo\Juez.class
+com\mycompany\bolirana\controlador\Bolirana.class
+com\mycompany\bolirana\modelo\Bolirana.class
+com\mycompany\bolirana\modelo\Persona.class
+com\mycompany\bolirana\modelo\Equipo.class
+com\mycompany\bolirana\modelo\Launcher.class
+com\mycompany\bolirana\modelo\Jugador.class
+com\mycompany\bolirana\modelo\JuegoSetup.class
+com\mycompany\bolirana\modelo\Lider.class
