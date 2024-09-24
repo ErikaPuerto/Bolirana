@@ -3,18 +3,17 @@ package edu.avanzada.bolirana.modelo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Equipo implements Serializable {
     private String nombre;
-    private Lider lider;  // Se ha cambiado el tipo a Lider
+    private Lider lider;
     private List<Jugador> jugadores;
-    private int puntajeTotal;
+    private int puntajeTotal;  // Se agregó nuevamente el campo puntajeTotal
 
     public Equipo(String nombre) {
         this.nombre = nombre;
         this.jugadores = new ArrayList<>();
-        this.puntajeTotal = 0;
+        this.puntajeTotal = 0;  // Inicializamos el puntajeTotal en 0
     }
 
     public String getNombre() {
@@ -24,15 +23,8 @@ public class Equipo implements Serializable {
     public List<Jugador> getJugadores() {
         return jugadores;
     }
-    
-     // Nuevo método para obtener jugadores excluyendo al líder
-    public List<Jugador> getJugadoresExcluyendoLider() {
-        return jugadores.stream()
-                        .filter(jugador -> !jugador.getNombre().equalsIgnoreCase(lider.getNombre()))
-                        .collect(Collectors.toList());
-    }
 
-     public Lider getLider() {
+    public Lider getLider() {
         return lider;
     }
 
@@ -40,16 +32,27 @@ public class Equipo implements Serializable {
         this.lider = lider;
     }
 
-    public int getPuntajeTotal() {
-        return puntajeTotal;
-    }
-
+    // Agregar puntaje al equipo
     public void agregarPuntaje(int puntaje) {
         this.puntajeTotal += puntaje;
+    }
+
+    // Obtener el puntaje total del equipo
+    public int getPuntajeTotal() {
+        return puntajeTotal;
     }
 
     // Agregar jugador al equipo
     public void agregarJugador(Jugador jugador) {
         jugadores.add(jugador);
+    }
+
+    // Excluir al líder de la lista de jugadores
+    public List<Jugador> getJugadoresSinLider() {
+        List<Jugador> jugadoresSinLider = new ArrayList<>(jugadores);
+        if (lider != null) {
+            jugadoresSinLider.removeIf(jugador -> jugador.getCedula().equals(lider.getCedula()));
+        }
+        return jugadoresSinLider;
     }
 }

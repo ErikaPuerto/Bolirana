@@ -1,10 +1,10 @@
 package edu.avanzada.bolirana.modelo;
 
 import edu.avanzada.bolirana.controlador.ControladorEquipo;
-import edu.avanzada.bolirana.controlador.ControladorJugador;
 import edu.avanzada.bolirana.vista.JuegoFrame;
 
 import javax.swing.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -15,161 +15,180 @@ public class Bolirana {
     private List<Equipo> equipos;
     private Juez juez;
     private JuegoFrame juegoFrame;
-    private int turnoActual;
     private boolean juegoActivo;
     private Random random;
-    private int contadorPisadas;
-    private Equipo equipoGanador;
+    private Equipo equipoA;
+    private Equipo equipoB;
+    private ControladorEquipo controladorEquipoA;
+    private ControladorEquipo controladorEquipoB;
+    private int turnoActual;
+    private int indiceJugadorEquipoA;
+    private int indiceJugadorEquipoB;
+    private Timer turnoTimer;
+    private static final int PUNTAJE_GANADOR = 5000;
 
-    /**
-     * Constructor para crear un juego de Bolirana.
-     *
-     * @param juez El juez encargado del juego.
-     * @param equipos Lista de equipos que participarán.
-     */
     public Bolirana(Juez juez, List<Equipo> equipos) {
         this.juez = juez;
         this.equipos = equipos;
         this.juegoActivo = true;
-        this.random = new Random(); // Inicializamos el generador aleatorio
-        this.contadorPisadas = 0;   // Contador de pisadas de la línea límite
-        this.equipoGanador = null;
+        this.random = new Random();
+        this.turnoActual = 0;
+        this.indiceJugadorEquipoA = 0;
+        this.indiceJugadorEquipoB = 0;
     }
 
-    /**
-     * Método que inicia el juego y realiza el sorteo para determinar qué equipo comienza.
-     */
     public void iniciarJuego() {
         if (juez == null) {
-            juegoFrame.agregarTurno("No se ha configurado un juez para este juego.");
-            return; // Evitar continuar si el juez no está configurado
+            if (juegoFrame != null) {
+                juegoFrame.agregarTurno("No se ha configurado un juez para este juego.");
+            }
+            return;
         }
 
-        // Crear la ventana del juego y la puntuación
         juegoFrame = new JuegoFrame(equipos.stream().map(Equipo::getNombre).toList());
         juegoFrame.setVisible(true);
 
-        // Simular el lanzamiento de la moneda por parte del juez
         juegoFrame.agregarTurno("El juez " + juez.getNombre() + " lanza la moneda...");
-        juegoFrame.agregarTurno("Por favor jugadores que no participen en el turno y espectadores, conservar una distancia de 2 metros. Solo debe estar en el área indicada el jugador correspondiente.");
+        juegoFrame.agregarTurno("Por favor jugadores que no participen en el turno y espectadores, mantener distancia de 2 metros.");
 
-        // Pausa de 5 segundos antes de mostrar el resultado del sorteo
-        Timer timer = new Timer(4000, e -> realizarSorteo());
-        timer.setRepeats(false);  // El sorteo solo se realiza una vez
+        Timer timer = new Timer(1000, e -> realizarSorteo());
+        timer.setRepeats(false);
         timer.start();
     }
 
-    /**
-     * Realiza el sorteo para determinar qué equipo comienza el juego.
-     */
     private void realizarSorteo() {
-        // Elegir un equipo aleatoriamente para que comience
-        int equipoInicialIndex = random.nextInt(equipos.size());
-        Equipo equipoInicial = equipos.get(equipoInicialIndex);
+        equipoA = equipos.get(random.nextInt(equipos.size()));
+        equipoB = equipos.get(random.nextInt(equipos.size()));
 
-        // Mostrar el resultado del sorteo en la interfaz
-        juegoFrame.agregarTurno("El equipo " + equipoInicial.getNombre() + " ha ganado el sorteo y comenzará el juego.");
-
-        // Iniciar el juego por turnos después del sorteo
-        iniciarTurnos(equipoInicial);
-    }
-
-    /**
-     * Inicia el juego por turnos después de que se haya decidido el equipo inicial.
-     *
-     * @param equipoInicial El equipo que comenzará el juego.
-     */
-    private void iniciarTurnos(Equipo equipoInicial) {
-        turnoActual = equipos.indexOf(equipoInicial);
-        realizarTurno();
-    }
-
-    /**
-     * Realiza el turno actual del equipo.
-     */
-    private void realizarTurno() {
-        if (!juegoActivo) {
-            return; // Detener el juego si ya terminó
+        while (equipoA.equals(equipoB)) {
+            equipoB = equipos.get(random.nextInt(equipos.size()));
         }
 
-        // Mostrar el mensaje del juez antes de cada turno
-        juegoFrame.agregarTurno("El juez verifica y da la orden para el lanzamiento.");
+        juegoFrame.agregarTurno("Los equipos seleccionados para jugar son: " + equipoA.getNombre() + " y " + equipoB.getNombre() + ".");
 
-        // Determinar el equipo actual que tiene el turno
-        Equipo equipoActual = equipos.get(turnoActual % equipos.size());
+        Collections.shuffle(equipoA.getJugadoresSinLider());
+        Collections.shuffle(equipoB.getJugadoresSinLider());
 
-        // Excluir al líder, solo los jugadores juegan
-        for (Jugador jugador : equipoActual.getJugadoresExcluyendoLider()) {  // Usamos el método que excluye al líder
-            ControladorJugador controladorJugador = new ControladorJugador(jugador);
-            ControladorEquipo controladorEquipo = new ControladorEquipo(equipoActual);
+        controladorEquipoA = new ControladorEquipo(equipoA);
+        controladorEquipoB = new ControladorEquipo(equipoB);
 
-            // Validaciones para el jugador antes de su turno
-            JCheckBox sePasoDeLaLinea = new JCheckBox("¿El jugador se pasó de la línea?");
-            JCheckBox lanzoCincoBolas = new JCheckBox("¿El jugador no lanzó las 5 bolas?");
-            JCheckBox dosMetros = new JCheckBox("¿El jugador no está a 2 metros?");
-            Object[] message = {
-                "Validaciones para " + jugador.getNombre() + ":",
-                sePasoDeLaLinea,
-                lanzoCincoBolas,
-                dosMetros
-            };
+        iniciarTurnos();
+    }
 
-            int option = JOptionPane.showConfirmDialog(null, message, "Validación del jugador", JOptionPane.OK_CANCEL_OPTION);
-            if (option == JOptionPane.OK_OPTION) {
-                // Si el jugador no cumple con alguna de las reglas
-                if (sePasoDeLaLinea.isSelected() || lanzoCincoBolas.isSelected() || dosMetros.isSelected()) {
-                    juegoFrame.agregarTurno("El turno de " + jugador.getNombre() + " ha sido anulado por no cumplir las reglas.");
-                    continue; // Saltar al siguiente jugador en el bucle
+    private void iniciarTurnos() {
+        turnoTimer = new Timer(500, e -> alternarTurnos());
+        turnoTimer.start();
+    }
+
+    private void alternarTurnos() {
+        if (!juegoActivo) return;
+
+        Jugador jugadorActual;
+
+        // Alternar entre los equipos A y B estrictamente
+        if (turnoActual % 2 == 0 && indiceJugadorEquipoA < equipoA.getJugadoresSinLider().size()) {
+            jugadorActual = equipoA.getJugadoresSinLider().get(indiceJugadorEquipoA);
+            realizarTurno(jugadorActual, equipoA, controladorEquipoA);
+            indiceJugadorEquipoA++;
+        } else if (turnoActual % 2 == 1 && indiceJugadorEquipoB < equipoB.getJugadoresSinLider().size()) {
+            jugadorActual = equipoB.getJugadoresSinLider().get(indiceJugadorEquipoB);
+            realizarTurno(jugadorActual, equipoB, controladorEquipoB);
+            indiceJugadorEquipoB++;
+        }
+
+        turnoActual++;
+
+        // Verificar si todos los jugadores han jugado y reiniciar índices
+        if (indiceJugadorEquipoA >= equipoA.getJugadoresSinLider().size() && 
+            indiceJugadorEquipoB >= equipoB.getJugadoresSinLider().size()) {
+            
+            indiceJugadorEquipoA = 0;
+            indiceJugadorEquipoB = 0;
+        }
+
+        // Verificar si algún equipo ha alcanzado el puntaje necesario para ganar
+        if (haAlcanzadoPuntajeGanador()) {
+            mostrarEquipoGanador();
+            turnoTimer.stop();
+        }
+    }
+
+    private void mostrarEquipoGanador() {
+        juegoActivo = false;
+        Equipo equipoGanador = controladorEquipoA.haGanado() ? equipoA : equipoB;
+
+        StringBuilder mensaje = new StringBuilder("¡El equipo " + equipoGanador.getNombre() + " ha ganado el torneo!\n\n");
+        mensaje.append("Jugadores del equipo ganador:\n");
+
+        for (Jugador jugador : equipoGanador.getJugadores()) {
+            mensaje.append(jugador.getNombre()).append(" - Cédula: ").append(jugador.getCedula()).append("\n");
+        }
+
+        mensaje.append("\nLíder: ").append(equipoGanador.getLider().getNombre());
+        mensaje.append("\nPuntaje final del equipo: ").append(
+            controladorEquipoA.haGanado() ? controladorEquipoA.getPuntajeTotal() : controladorEquipoB.getPuntajeTotal()
+        ).append(" puntos.");
+
+        JOptionPane.showMessageDialog(juegoFrame, mensaje.toString(), "¡Equipo Ganador!", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private boolean haAlcanzadoPuntajeGanador() {
+        return controladorEquipoA.haGanado() || controladorEquipoB.haGanado();
+    }
+
+    private void realizarTurno(Jugador jugador, Equipo equipo, ControladorEquipo controladorEquipo) {
+        if (!juegoActivo) return;
+
+        boolean validado = mostrarValidaciones(jugador);
+        if (!validado) {
+            juegoFrame.agregarTurno("El turno de " + jugador.getNombre() + " ha sido cancelado.");
+            return;
+        }
+
+        final Timer[] lanzamientoTimer = {null};
+        final int[] lanzamientoActual = {1};
+
+        lanzamientoTimer[0] = new Timer(200, e -> {
+            if (lanzamientoActual[0] <= 5 && juegoActivo) {
+                int puntaje = determinarPuntajeLanzamiento();
+                controladorEquipo.agregarPuntaje(puntaje);
+
+                juegoFrame.agregarTurno("Lanzamiento " + lanzamientoActual[0] + ": " + jugador.getNombre() + " del equipo " + equipo.getNombre() + " obtuvo " + puntaje + " puntos.");
+                juegoFrame.actualizarPuntaje(equipo.getNombre(), controladorEquipo.getPuntajeTotal());
+
+                if (controladorEquipo.haGanado()) {
+                    mostrarEquipoGanador();
+                    lanzamientoTimer[0].stop();
                 }
+
+                lanzamientoActual[0]++;
             } else {
-                juegoFrame.agregarTurno("El turno de " + jugador.getNombre() + " ha sido cancelado.");
-                continue; // Si el diálogo se cancela, saltar al siguiente jugador
+                lanzamientoTimer[0].stop();
             }
+        });
 
-            // Simular 5 lanzamientos
-            for (int i = 1; i <= 5; i++) {
-                // Delay entre lanzamientos (1.5 segundos)
-                int finalI = i;
-                Timer lanzamientoTimer = new Timer(750, e -> {
-                    // Simular el lanzamiento de la bola
-                    int puntaje = determinarPuntajeLanzamiento();
-                    controladorEquipo.agregarPuntaje(puntaje);
-
-                    // Mostrar el resultado del lanzamiento
-                    String mensajeLanzamiento = "Lanzamiento de bola " + finalI + ": " + jugador.getNombre() + " del equipo " + equipoActual.getNombre() + " obtuvo " + puntaje + " puntos.";
-                    juegoFrame.agregarTurno(mensajeLanzamiento);
-
-                    // Actualizar la puntuación del equipo
-                    juegoFrame.actualizarPuntaje(equipoActual.getNombre(), equipoActual.getPuntajeTotal());
-
-                    // Verificar si el equipo ha ganado
-                    if (controladorEquipo.haGanado()) {
-                        juegoFrame.agregarTurno("¡El equipo " + equipoActual.getNombre() + " ha ganado el juego con " + equipoActual.getPuntajeTotal() + " puntos!");
-                        juegoActivo = false; // Finalizar el juego
-                        equipoGanador = equipoActual;  // Asignamos el equipo ganador
-                    }
-
-                    // Verificar si se han completado los lanzamientos del jugador y del equipo
-                    if (finalI == 5 && jugador == equipoActual.getJugadoresExcluyendoLider().get(equipoActual.getJugadoresExcluyendoLider().size() - 1)) {
-                        turnoActual++;
-                        realizarTurno(); // Llamar a realizarTurno para el siguiente equipo
-                    }
-                });
-                lanzamientoTimer.setRepeats(false);
-                lanzamientoTimer.start();
-            }
-        }
+        lanzamientoTimer[0].setRepeats(true);
+        lanzamientoTimer[0].start();
     }
 
-    /**
-     * Determina el puntaje de un lanzamiento basado en los diferentes orificios del juego.
-     *
-     * @return El puntaje obtenido en el lanzamiento.
-     */
+    private boolean mostrarValidaciones(Jugador jugador) {
+        JCheckBox sePasoDeLaLinea = new JCheckBox("¿El jugador se pasó de la línea?");
+        JCheckBox lanzoCincoBolas = new JCheckBox("¿El jugador no lanzó las 5 bolas?");
+        JCheckBox dosMetros = new JCheckBox("¿El jugador no está a 2 metros?");
+        Object[] message = {
+            "Validaciones para " + jugador.getNombre() + ":",
+            sePasoDeLaLinea,
+            lanzoCincoBolas,
+            dosMetros
+        };
+
+        int option = JOptionPane.showConfirmDialog(null, message, "Validación del jugador", JOptionPane.OK_CANCEL_OPTION);
+        return option == JOptionPane.OK_OPTION && !(sePasoDeLaLinea.isSelected() || lanzoCincoBolas.isSelected() || dosMetros.isSelected());
+    }
+
     private int determinarPuntajeLanzamiento() {
         int resultado = random.nextInt(100);
         if (resultado < 10) {
-            juegoFrame.agregarTurno("¡RANA! 50 puntos.");
             return 50;
         } else if (resultado < 30) {
             return 25;
@@ -178,9 +197,5 @@ public class Bolirana {
         } else {
             return 5;
         }
-    }
-
-    public Equipo getEquipoGanador(){
-        return equipoGanador;
     }
 }

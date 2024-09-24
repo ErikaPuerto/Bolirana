@@ -1,17 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package edu.avanzada.bolirana.controlador;
 
 import edu.avanzada.bolirana.modelo.Equipo;
 import edu.avanzada.bolirana.modelo.Jugador;
 
 /**
- *
- * @author nedic
+ * Controlador para gestionar las operaciones de un equipo.
  */
 public class ControladorEquipo {
+    private static final int PUNTAJE_GANADOR = 5000;
     private Equipo equipo;
 
     public ControladorEquipo(Equipo equipo) {
@@ -27,7 +23,7 @@ public class ControladorEquipo {
      * @param puntaje Puntaje a agregar.
      */
     public void agregarPuntaje(int puntaje) {
-        equipo.agregarPuntaje(puntaje);
+        equipo.agregarPuntaje(puntaje); // Sumar el puntaje al puntajeTotal del equipo
     }
 
     /**
@@ -35,6 +31,10 @@ public class ControladorEquipo {
      * @return true si el puntaje total es mayor o igual a 5000.
      */
     public boolean haGanado() {
-        return equipo.getPuntajeTotal() >= 5000;
+        return equipo.getPuntajeTotal() >= PUNTAJE_GANADOR;  // Verificar el puntajeTotal del equipo
+    }
+
+    public int getPuntajeTotal() {
+        return equipo.getPuntajeTotal();  // Retorna el puntaje total del equipo
     }
 }
