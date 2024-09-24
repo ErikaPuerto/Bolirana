@@ -3,10 +3,11 @@ package edu.avanzada.bolirana.modelo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Equipo implements Serializable {
     private String nombre;
-    private Lider lider;
+    private Lider lider;  // Se ha cambiado el tipo a Lider
     private List<Jugador> jugadores;
     private int puntajeTotal;
 
@@ -22,6 +23,13 @@ public class Equipo implements Serializable {
 
     public List<Jugador> getJugadores() {
         return jugadores;
+    }
+    
+     // Nuevo método para obtener jugadores excluyendo al líder
+    public List<Jugador> getJugadoresExcluyendoLider() {
+        return jugadores.stream()
+                        .filter(jugador -> !jugador.getNombre().equalsIgnoreCase(lider.getNombre()))
+                        .collect(Collectors.toList());
     }
 
      public Lider getLider() {
@@ -44,10 +52,4 @@ public class Equipo implements Serializable {
     public void agregarJugador(Jugador jugador) {
         jugadores.add(jugador);
     }
-
-    // Excluir al líder de la lista de jugadores
-    public List<Jugador> getJugadoresSinLider() {
-        return jugadores; // Solo jugadores, sin el líder
-    }
 }
-

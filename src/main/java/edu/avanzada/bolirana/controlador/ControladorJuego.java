@@ -1,40 +1,40 @@
 package edu.avanzada.bolirana.controlador;
-import edu.avanzada.bolirana.controlador.JuegoSetup;
+
+import edu.avanzada.bolirana.modelo.Bolirana;
 import edu.avanzada.bolirana.modelo.Equipo;
 import edu.avanzada.bolirana.modelo.Jugador;
-import edu.avanzada.bolirana.modelo.Bolirana;
 import edu.avanzada.bolirana.modelo.Lider;
 import edu.avanzada.bolirana.vista.EquipoFrame;
-import edu.avanzada.bolirana.vista.JugadorFrame;
-import edu.avanzada.bolirana.vista.JuezFrame;
-import edu.avanzada.bolirana.vista.MainFrame;
 import edu.avanzada.bolirana.vista.JuegoFrame;
+import edu.avanzada.bolirana.vista.JuezFrame;
+import edu.avanzada.bolirana.vista.JugadorFrame;
+import edu.avanzada.bolirana.vista.MainFrame;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.Timer;
 
+/**
+ * Controlador para gestionar la configuración y ejecución del juego.
+ */
 public class ControladorJuego {
+
     private MainFrame mainFrame;
     private JuegoSetup juegoSetup;
     private JuegoFrame juegoFrame;
-    private Bolirana bolirana;  // Instancia de la clase Bolirana para manejar la lógica del juego
-    private List<Equipo> equiposRestantes; // Lista de equipos para la selección aleatoria
-    private boolean partidoEnCurso = false; // Variable para controlar si un partido está en curso
+    private Bolirana bolirana;  // Lógica del juego
+    private List<Equipo> equiposRestantes;  // Lista de equipos para la selección aleatoria
+    private boolean partidoEnCurso = false;  // Controla si un partido está en curso
     private int indiceJugadorEquipo1 = 0;  // Índice del jugador actual del equipo 1
     private int indiceJugadorEquipo2 = 0;  // Índice del jugador actual del equipo 2
     private boolean turnoEquipo1 = true;  // Para alternar entre los equipos
 
-    /**
-     * Constructor que inicializa el controlador.
-     */
     public ControladorJuego(MainFrame mainFrame, JuegoSetup juegoSetup) {
         this.mainFrame = mainFrame;
         this.juegoSetup = juegoSetup;
-
-        // Conectar los listeners
         conectarListeners();
     }
 
@@ -42,16 +42,13 @@ public class ControladorJuego {
         mainFrame.addIniciarConfiguracionListener(e -> abrirVentanaJuez());
         mainFrame.addIniciarJuegoListener(e -> {
             try {
-                iniciarJuegoEntreDosEquiposAleatorios();  // Iniciar el juego directamente entre dos equipos aleatorios
+                iniciarJuegoEntreDosEquiposAleatorios();  // Inicia el juego entre dos equipos seleccionados aleatoriamente
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(mainFrame, "Ocurrió un error al iniciar el juego: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
     }
 
-    /**
-     * Método para abrir la ventana del juez para configurarlo.
-     */
     private void abrirVentanaJuez() {
         JuezFrame juezFrame = new JuezFrame();
         juezFrame.setVisible(true);
@@ -68,14 +65,11 @@ public class ControladorJuego {
             }
 
             juegoSetup.configurarJuez(nombre, cedula, edad, tarjetaProfesional);
-            juezFrame.dispose(); // Cerrar la ventana del juez
+            juezFrame.dispose();  // Cerrar la ventana del juez
             preguntarNumeroEquipos();
         });
     }
 
-    /**
-     * Método para preguntar cuántos equipos se desean inscribir.
-     */
     private void preguntarNumeroEquipos() {
         String input = JOptionPane.showInputDialog(mainFrame, "¿Cuántos equipos desea inscribir? (2-6 equipos)", "Número de equipos", JOptionPane.QUESTION_MESSAGE);
         try {
@@ -93,20 +87,14 @@ public class ControladorJuego {
         }
     }
 
-    /**
-     * Método para configurar el siguiente equipo.
-     */
     private void configurarEquipoSiguiente() {
         if (juegoSetup.getEquipos().size() < juegoSetup.getTotalEquipos()) {
-            abrirVentanaEquipo();
+            abrirVentanaEquipo();  // Abrir la ventana para configurar el siguiente equipo
         } else {
             JOptionPane.showMessageDialog(mainFrame, "Todos los equipos han sido configurados.");
         }
     }
 
-    /**
-     * Método para abrir la ventana de inscripción de equipos.
-     */
     private void abrirVentanaEquipo() {
         EquipoFrame equipoFrame = new EquipoFrame();
         equipoFrame.setVisible(true);
@@ -121,21 +109,15 @@ public class ControladorJuego {
             Equipo equipo = new Equipo(nombreEquipo);
             juegoSetup.agregarEquipo(equipo);
             equipoFrame.dispose();
-            preguntarNumeroJugadores(equipo);  // Configurar los jugadores del equipo
+            preguntarNumeroJugadores(equipo);  // Pasar a la configuración de los jugadores del equipo
         });
     }
 
-    /**
-     * Preguntar cuántos jugadores tendrá el equipo actual.
-     */
     private void preguntarNumeroJugadores(Equipo equipo) {
         JOptionPane.showMessageDialog(mainFrame, "Cada equipo debe tener exactamente 6 jugadores.", "Información", JOptionPane.INFORMATION_MESSAGE);
         abrirVentanaJugador(equipo, 6);  // Registrar jugadores
     }
 
-    /**
-     * Método para abrir la ventana de inscripción de jugadores.
-     */
     private void abrirVentanaJugador(Equipo equipo, int jugadoresPorEquipo) {
         JugadorFrame jugadorFrame = new JugadorFrame();
         jugadorFrame.setVisible(true);
@@ -163,9 +145,6 @@ public class ControladorJuego {
         });
     }
 
-    /**
-     * Método para seleccionar un capitán de equipo.
-     */
     private void elegirLider(Equipo equipo) {
         String nombreLider = JOptionPane.showInputDialog(mainFrame, "¿Quién será el líder del equipo " + equipo.getNombre() + "?");
 
@@ -176,7 +155,7 @@ public class ControladorJuego {
 
         if (jugadorLider == null) {
             JOptionPane.showMessageDialog(mainFrame, "El líder no coincide con ningún jugador registrado. Inténtalo de nuevo.", "Error", JOptionPane.ERROR_MESSAGE);
-            elegirLider(equipo);
+            elegirLider(equipo);  // Reintentar si no se encuentra el líder
         } else {
             boolean experienciaValida = false;
             int experiencia = 0;
@@ -192,7 +171,6 @@ public class ControladorJuego {
             }
 
             equipo.setLider(new Lider(jugadorLider.getNombre(), jugadorLider.getCedula(), jugadorLider.getEdad(), experiencia));
-
             JOptionPane.showMessageDialog(mainFrame, "El líder del equipo " + equipo.getNombre() + " es " + jugadorLider.getNombre() + " con " + experiencia + " años de experiencia.");
             configurarEquipoSiguiente();
         }
@@ -214,27 +192,20 @@ public class ControladorJuego {
         // Seleccionar dos equipos aleatorios
         Equipo[] equiposSeleccionados = seleccionarDosEquiposAleatorios(equiposRestantes);
 
-        // Iniciar el partido entre los dos equipos seleccionados
         iniciarPartido(equiposSeleccionados[0], equiposSeleccionados[1]);
     }
 
-    /**
-     * Seleccionar dos equipos aleatorios de la lista.
-     */
     private Equipo[] seleccionarDosEquiposAleatorios(List<Equipo> equipos) {
         Collections.shuffle(equipos);  // Mezclar la lista de equipos
         return new Equipo[]{equipos.get(0), equipos.get(1)};  // Seleccionar los dos primeros después de mezclar
     }
 
-    /**
-     * Iniciar un partido entre dos equipos seleccionados con alternancia de jugadores.
-     */
     private void iniciarPartido(Equipo equipo1, Equipo equipo2) {
-        List<Jugador> jugadoresEquipo1 = equipo1.getJugadores();
-        List<Jugador> jugadoresEquipo2 = equipo2.getJugadores();
+        // Obtener los jugadores excluyendo al líder para ambos equipos
+        List<Jugador> jugadoresEquipo1 = equipo1.getJugadoresExcluyendoLider();
+        List<Jugador> jugadoresEquipo2 = equipo2.getJugadoresExcluyendoLider();
 
         this.juegoFrame = new JuegoFrame(List.of(equipo1.getNombre(), equipo2.getNombre()));
-
         this.bolirana = new Bolirana(juegoSetup.getJuez(), List.of(equipo1, equipo2));
 
         JOptionPane.showMessageDialog(mainFrame, "¡El partido entre " + equipo1.getNombre() + " y " + equipo2.getNombre() + " va a comenzar!");
@@ -246,6 +217,7 @@ public class ControladorJuego {
         Timer timer = new Timer(1000, e -> {
             Jugador jugadorActual;
 
+            // Alternar turnos
             if (turnoEquipo1) {
                 jugadorActual = jugadoresEquipo1.get(indiceJugadorEquipo1);
                 indiceJugadorEquipo1 = (indiceJugadorEquipo1 + 1) % jugadoresEquipo1.size();  // Avanzar al siguiente jugador del equipo 1
@@ -254,9 +226,7 @@ public class ControladorJuego {
                 indiceJugadorEquipo2 = (indiceJugadorEquipo2 + 1) % jugadoresEquipo2.size();  // Avanzar al siguiente jugador del equipo 2
             }
 
-           
-            // Alternar el equipo para el próximo turno
-            turnoEquipo1 = !turnoEquipo1;
+            turnoEquipo1 = !turnoEquipo1;  // Cambiar el turno entre equipos
 
             // Verificar si ya hay un ganador
             Equipo ganador = bolirana.getEquipoGanador();
